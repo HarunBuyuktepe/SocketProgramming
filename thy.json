@@ -1,0 +1,101 @@
+{
+    "passenger_capacity": 180,
+    "reservations": [
+        {
+            "date": "2019-12-27",
+            "passenger_count": 178
+        },
+        {
+            "date": "2019-12-28",
+            "passenger_count": 170
+        },
+        {
+            "date": "2019-12-29",
+            "passenger_count": 175
+        },
+        {
+            "date": "2019-12-30",
+            "passenger_count": 169
+        },
+        {
+            "date": "2019-12-31",
+            "passenger_count": 179
+        },
+        {
+            "date": "2020-01-01",
+            "passenger_count": 180
+        },
+        {
+            "date": "2020-01-02",
+            "passenger_count": 155
+        },
+        {
+            "date": "2020-01-03",
+            "passenger_count": 151
+        },
+        {
+            "date": "2020-01-04",
+            "passenger_count": 143
+        },
+        {
+            "date": "2020-01-05",
+            "passenger_count": 136
+        },
+        {
+            "date": "2020-01-06",
+            "passenger_count": 130
+        },
+        {
+            "date": "2020-01-07",
+            "passenger_count": 126
+        },
+        {
+            "date": "2020-01-08",
+            "passenger_count": 111
+        },
+        {
+            "date": "2020-01-09",
+            "passenger_count": 105
+        },
+        {
+            "date": "2020-01-10",
+            "passenger_count": 100
+        },
+        {
+            "date": "2020-01-11",
+            "passenger_count": 96
+        },
+        {
+            "date": "2020-01-12",
+            "passenger_count": 105
+        },
+        {
+            "date": "2020-01-13",
+            "passenger_count": 157
+        },
+        {
+            "date": "2020-01-14",
+            "passenger_count": 79
+        },
+        {
+            "date": "2020-01-15",
+            "passenger_count": 36
+        },
+        {
+            "date": "2020-01-16",
+            "passenger_count": 84
+        },
+        {
+            "date": "2020-01-17",
+            "passenger_count": 42
+        },
+        {
+            "date": "2020-01-18",
+            "passenger_count": 34
+        },
+        {
+            "date": "2020-01-19",
+            "passenger_count": 13
+        }
+    ]
+}
