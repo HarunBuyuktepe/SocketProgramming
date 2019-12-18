@@ -1,0 +1,101 @@
+{
+    "total_room_count": 200,
+    "reservations": [
+        {
+            "date": "2019-12-27",
+            "customer_count": 200
+        },
+        {
+            "date": "2019-12-28",
+            "customer_count": 198
+        },
+        {
+            "date": "2019-12-29",
+            "customer_count": 190
+        },
+        {
+            "date": "2019-12-30",
+            "customer_count": 200
+        },
+        {
+            "date": "2019-12-31",
+            "customer_count": 179
+        },
+        {
+            "date": "2020-01-01",
+            "customer_count": 180
+        },
+        {
+            "date": "2020-01-02",
+            "customer_count": 155
+        },
+        {
+            "date": "2020-01-03",
+            "customer_count": 188
+        },
+        {
+            "date": "2020-01-04",
+            "customer_count": 143
+        },
+        {
+            "date": "2020-01-05",
+            "customer_count": 136
+        },
+        {
+            "date": "2020-01-06",
+            "customer_count": 130
+        },
+        {
+            "date": "2020-01-07",
+            "customer_count": 126
+        },
+        {
+            "date": "2020-01-08",
+            "customer_count": 111
+        },
+        {
+            "date": "2020-01-09",
+            "customer_count": 105
+        },
+        {
+            "date": "2020-01-10",
+            "customer_count": 100
+        },
+        {
+            "date": "2020-01-11",
+            "customer_count": 96
+        },
+        {
+            "date": "2020-01-12",
+            "customer_count": 105
+        },
+        {
+            "date": "2020-01-13",
+            "customer_count": 157
+        },
+        {
+            "date": "2020-01-14",
+            "customer_count": 79
+        },
+        {
+            "date": "2020-01-15",
+            "customer_count": 36
+        },
+        {
+            "date": "2020-01-16",
+            "customer_count": 84
+        },
+        {
+            "date": "2020-01-17",
+            "customer_count": 42
+        },
+        {
+            "date": "2020-01-18",
+            "customer_count": 34
+        },
+        {
+            "date": "2020-01-19",
+            "customer_count": 13
+        }
+    ]
+}
