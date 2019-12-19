@@ -10,35 +10,35 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         print("GET\nPath: {}\nHeaders:\n{}\n".format(str(self.path), str(self.headers)))
-        if self.path == "/allHotels":  # Burada bütün otellerin json dosyaları bulunup bir stringde birleştirilip gönderilecek
+        if self.path == "/allAirlines":  # Burada bütün otellerin json dosyaları bulunup bir stringde birleştirilip gönderilecek
             currentDirectory = os.getcwd()
             files = ""
             # r=root, d=directories, f = files
             for r, d, f in os.walk(currentDirectory):
                 for file in f:
-                    if '.json' in file and "h_" in file:
+                    if '.json' in file and "a_" in file:
                         files += str(file) + ";"
             result = str(files)
-        elif "/hotelQuery/" in self.path:
+        elif "/airlineQuery/" in self.path:
             tokens = self.path.split("/")
             arrival_date = tokens[2]
             departure_date = tokens[3]
-            preffered_hotel = tokens[4].lower()
+            preffered_airline = tokens[4].lower()
             number_of_travelers = int(tokens[5].strip())
             try:
-                with open("h_" + preffered_hotel + ".json") as hotel_db:
-                    hotel = json.load(hotel_db)
-                    total_room_count = hotel["total_room_count"]
-                    empty_rooms = total_room_count - hotel["reservations"][arrival_date]
-                    if empty_rooms > number_of_travelers:
+                with open("a_" + preffered_airline + ".json") as airline_db:
+                    airline = json.load(airline_db)
+                    passenger_capacity = airline["passenger_capacity"]
+                    empty_seats = passenger_capacity - airline["reservations"][arrival_date]
+                    if empty_seats > number_of_travelers:
                         result = "OK"
                     else:
-                        result = "Not enough rooms!"
+                        result = "Not enough seats!"
             except FileNotFoundError:
-                result = "Invalid hotel name!"
-            except KeyError:  # All rooms are empty
-                if number_of_travelers > total_room_count:
-                    result = "Not enough room!"
+                result = "Invalid airline name!"
+            except KeyError:  # All seats are empty
+                if number_of_travelers > passenger_capacity:
+                    result = "Not enough seats!"
                 else:
                     result = "OK"
         else:
@@ -56,14 +56,14 @@ class RequestHandler(BaseHTTPRequestHandler):
         self._set_response()
         self.wfile.write("POST request for {}".format(self.path).encode())'''
 
-def run(server_class=HTTPServer, handler_class=RequestHandler, port=33333):
+def run(server_class=HTTPServer, handler_class=RequestHandler, port=44444):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    print("Hotel server has been started.")
+    print("Airline server has been started.")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print("Hotel server has been stopped.")
+        print("Airline server has been stopped.")
         httpd.server_close()
 
 run()

@@ -34,12 +34,14 @@ try:
         elif query == "airlines":
              result = contact_with_port(AIRLINE_PORT, "/allAirlines")
         else:
-            tokens = query.split(" ")
-            arrival_date = tokens[0]
-            departure_date = tokens[1]
-            preffered_hotel = tokens[2]
-            preffered_airline = tokens[3]
-            number_of_travelers = tokens[4]
+            tokens = query.split("/")
+            arrival_date = tokens[1]
+            departure_date = tokens[2]
+            preffered_hotel = tokens[3]
+            preffered_airline = tokens[4]
+            number_of_travelers = tokens[5]
+
+            print("tokens", tokens)
 
             today = date.today()
             arrival = datetime.strptime(arrival_date, "%Y-%m-%d")
@@ -47,7 +49,13 @@ try:
             if arrival.date() < today or departure.date() < today:
                 result = "You cannot choose a past date!"
             else:
-                result = contact_with_port(HOTEL_PORT, query)
+                hotel_query = "/hotelQuery/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
+                result = contact_with_port(HOTEL_PORT, hotel_query)
+                if result == "OK":
+                    airline_query = "/airlineQuery/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
+                    result = contact_with_port(AIRLINE_PORT, airline_query)
+                    if result == "OK":
+                        result = "Reservation completed succesfully."
 
         connectionSocket.send(result.encode())
         connectionSocket.close()

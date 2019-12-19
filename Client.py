@@ -20,7 +20,7 @@ def create_list_from_string(string):
     return result_list
 
 
-# Sample call: py client.py 2020-05-06 2020-05-14 Hilton Emirates 2
+# Sample call: py client.py 2020-05-06 2020-05-14 Hilton THY 2
 if len(argv) == 6:
     arrival_date = argv[1]
     departure_date = argv[2]
@@ -43,11 +43,11 @@ if len(argv) == 6:
     except ConnectionRefusedError:
         print("Travel agency is not responding. Please try again later.")
         exit()
-    hotel_string = contact_travel_agency(clientSocket, "hotels")
+    '''hotel_string = contact_travel_agency(clientSocket, "hotels")
     hotel_list = create_list_from_string(hotel_string)
     print("All hotels:", hotel_list)
 
-    '''airline_string = contact_travel_agency(clientSocket, "airlines")
+    airline_string = contact_travel_agency(clientSocket, "airlines")
     airline_list = create_list_from_string(airline_string)  # Bu listeler GUI'de gösterilmek için kullanılacak 
     print("All airlines:", airline_list)'''
 
