@@ -3,6 +3,7 @@ import os
 import json
 
 airlines = {}
+airlines_for_gui = []
 
 class RequestHandler(BaseHTTPRequestHandler):
     def _set_response(self):
@@ -13,7 +14,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         print("GET\nPath: {}\nHeaders:\n{}\n".format(str(self.path), str(self.headers)))
         if self.path == "/allAirlines":  # Burada bütün otellerin json dosyaları bulunup bir stringde birleştirilip gönderilecek
-            return str(airlines)
+            result= str(airlines_for_gui)
         elif "/airlineQuery/" in self.path:
             tokens = self.path.split("/")
             arrival_date = tokens[2]
@@ -94,6 +95,7 @@ def find_all_airlines():
                 airline_name = file[2:len(file) - 5]
                 with open(file) as airline_db:
                     airlines[airline_name] = json.load(airline_db)
+                    airlines_for_gui.append(airline_name)
 
 def run(server_class=HTTPServer, handler_class=RequestHandler, port=44444):
     server_address = ('', port)

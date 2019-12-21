@@ -38,12 +38,46 @@ def query_reservation(arrival_date, departure_date, preffered_hotel, preffered_a
         print("Travel agency is not responding. Please try again later.")
         info_text.set("Travel agency is not responding. Please try again later.")
 
+def query_get_hotels():#to get hotels' name
+    clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
+    print("Contacting with travel agency...")
+    try:
+        clientSocket.connect((TRAVEL_AGENCY_IP, TRAVEL_AGENCY_PORT))
+        req = "hotels"
+        response = contact_travel_agency(clientSocket, req)
+        clientSocket.close()
+        return clear(response)
+    except ConnectionRefusedError:
+        print("Travel agency is not responding. Please try again later.")
+
+def query_get_airlines():#to get hotels' name
+    clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
+    print("Contacting with travel agency...")
+    try:
+        clientSocket.connect((TRAVEL_AGENCY_IP, TRAVEL_AGENCY_PORT))
+        req = "airlines"
+        response = contact_travel_agency(clientSocket, req)
+        clientSocket.close()
+        return clear(response)
+    except ConnectionRefusedError:
+        print("Travel agency is not responding. Please try again later.")
+
+
 def reservation():
     if tkvarAirway.get() != "Please Select" and tkvarHotel.get() != "Please Select":
         print(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), e3.get().strip())
         query_reservation(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), int(e3.get().strip()))
     else:
-        print("yapma")
+        info_text.set("Occur some text mistake")
+def clear(string_list):
+    string_list = string_list.split("," and "[" and "]" and "'")
+    rangeof = len(string_list) - 1
+    for i in range(rangeof, -1, -1):
+        if string_list[i] == ", " or string_list[i] == "[" or string_list[i] == "]" or string_list[i] == "'":
+            string_list.remove(string_list[i])
+        else:
+            string_list[i]=string_list[i][0].upper()+string_list[i][1:]
+    return string_list
 
 root = Tk()
 root.title("Network Term Project")
@@ -75,7 +109,8 @@ e3.grid(row=2, column=2)
 tkvarHotel = StringVar(root)
 
 # Dictionary with options
-hotelChoices = {'Hilton', 'Paris', 'Hayat', 'Ramada'}
+hotelChoices = query_get_hotels()
+print(hotelChoices)
 tkvarHotel.set('Please Select')  # set the default option
 
 popupMenu = OptionMenu(mainFrame, tkvarHotel, *hotelChoices)
@@ -86,10 +121,10 @@ popupMenu.grid(row=5, column=1)
 tkvarAirway = StringVar(root)
 
 # Dictionary with options
-hotelChoices = {'Thy', 'Pegasus', 'Anadolu Jet', 'Emirates', 'Air France'}
+airlinesChoices = query_get_airlines()
 tkvarAirway.set('Please Select')  # set the default option
 
-popupMenu = OptionMenu(mainFrame, tkvarAirway, *hotelChoices)
+popupMenu = OptionMenu(mainFrame, tkvarAirway, *airlinesChoices)
 Label(mainFrame, text="Choose an Airline").grid(row=3, column=3)
 popupMenu.grid(row=5, column=3)
 
