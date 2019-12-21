@@ -22,24 +22,23 @@ class RequestHandler(BaseHTTPRequestHandler):
             number_of_travelers = int(tokens[5].strip())
             try:
                 airline = airlines[preffered_airline]
+                try:
+                    passenger_capacity = airline["passenger_capacity"]
+                    empty_seats1 = passenger_capacity - airline["reservations"][arrival_date]
+                except KeyError:  # All seats are empty
+                    try:
+                        empty_seats2 = passenger_capacity - airline["reservations"][departure_date]
+                        if empty_seats1 >= number_of_travelers and empty_seats2 >= number_of_travelers:
+                            result = "OK"
+                        else:
+                            result = "Not enough seats!"
+                    except KeyError:
+                        if number_of_travelers <= passenger_capacity:
+                            result = "OK"
+                        else:
+                            result = "Not enough seats!"
             except KeyError:
                 result = "Invalid airline name!"
-            try:
-                passenger_capacity = airline["passenger_capacity"]
-                empty_seats1 = passenger_capacity - airline["reservations"][arrival_date]
-            except KeyError:  # All seats are empty
-                try:
-                    empty_seats2 = passenger_capacity - airline["reservations"][departure_date]
-                    if empty_seats1 >= number_of_travelers and empty_seats2 >= number_of_travelers:
-                        result = "OK"
-                    else:
-                        result = "Not enough seats!"
-                except KeyError:
-                    if number_of_travelers <= passenger_capacity:
-                        result = "OK"
-                    else:
-                        result = "Not enough seats!"
-            
         elif "/airlineReserve" in self.path:
             tokens = self.path.split("/")
             arrival_date = tokens[2]

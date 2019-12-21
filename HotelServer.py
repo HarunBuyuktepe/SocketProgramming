@@ -25,34 +25,34 @@ class RequestHandler(BaseHTTPRequestHandler):
             departure = datetime.strptime(departure_date, "%Y-%m-%d")
             try:
                 hotel = hotels[preffered_hotel]
-            except KeyError:
-                result = "Invalid hotel name!"
-            if arrival == departure:
-                result = "OK"
-            else:
-                total_room_count = hotel["total_room_count"]
-                current = arrival
-                enough_capacity = True
-                while enough_capacity:
-                    try:
-                        empty_rooms = total_room_count - hotel["reservations"][current.strftime("%Y-%m-%d")]
-                        print("empty_rooms", empty_rooms)
-                    except KeyError:
-                        if number_of_travelers > total_room_count:
+                if arrival == departure:
+                    result = "OK"
+                else:
+                    total_room_count = hotel["total_room_count"]
+                    current = arrival
+                    enough_capacity = True
+                    while enough_capacity:
+                        try:
+                            empty_rooms = total_room_count - hotel["reservations"][current.strftime("%Y-%m-%d")]
+                            print("empty_rooms", empty_rooms)
+                        except KeyError:
+                            if number_of_travelers > total_room_count:
+                                enough_capacity = False
+                                result = "Not enough rooms!"
+                                break
+                            else:
+                                empty_rooms = total_room_count
+                        if empty_rooms < number_of_travelers:
+                            print("Not enough rooms", number_of_travelers, "-", empty_rooms)
                             enough_capacity = False
                             result = "Not enough rooms!"
                             break
-                        else:
-                            empty_rooms = total_room_count
-                    if empty_rooms < number_of_travelers:
-                        print("Not enough rooms", number_of_travelers, "-", empty_rooms)
-                        enough_capacity = False
-                        result = "Not enough rooms!"
-                        break
-                    elif (current + timedelta(days=1)) == departure:
-                        result = "OK"
-                        break
-                    current += timedelta(days=1)
+                        elif (current + timedelta(days=1)) == departure:
+                            result = "OK"
+                            break
+                        current += timedelta(days=1)
+            except KeyError:
+                result = "Invalid hotel name!"
         elif "/hotelReserve" in self.path:
             tokens = self.path.split("/")
             arrival_date = tokens[2]

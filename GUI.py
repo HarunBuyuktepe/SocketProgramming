@@ -32,6 +32,7 @@ def query_reservation(arrival_date, departure_date, preffered_hotel, preffered_a
         req = "/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + preffered_airline + "/" + str(number_of_travelers)
         response = contact_travel_agency(clientSocket, req)
         print(response)
+        info_text.set(response)
         clientSocket.close()
     except ConnectionRefusedError:
         print("Travel agency is not responding. Please try again later.")
