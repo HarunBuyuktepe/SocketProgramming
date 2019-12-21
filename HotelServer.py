@@ -13,7 +13,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         print("GET\nPath: {}\nHeaders:\n{}\n".format(str(self.path), str(self.headers)))
-        if self.path == "/allHotels":  # Burada bütün otellerin json dosyaları bulunup bir stringde birleştirilip gönderilecek
+        if self.path == "/allHotels":
             return str(hotels)
         elif "/hotelQuery/" in self.path:
             tokens = self.path.split("/")

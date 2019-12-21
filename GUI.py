@@ -1,20 +1,48 @@
 from tkinter import *
 import tkinter as ttk
 import os
+from datetime import date, datetime, timedelta
+import socket
+import re
 
-def helloCallBack():
-    #os.system('py client.py 2020-01-15 2020-01-20 Hilton THY 2')
-    print("Fena tarih")
+date_pattern = "20[0-9]{2}-(((0)[0-9])|((1)[0-2]))-([0-2][0-9]|(3)[0-1])"  # e.g. 2019-05-14
+TRAVEL_AGENCY_IP = '127.0.0.1'  # localhost
+TRAVEL_AGENCY_PORT = 12000  # Port to be connected
+
+
+def contact_travel_agency(socket, request):
+    socket.send(request.encode())
+    return socket.recv(1024).decode()
+
+def query_reservation(arrival_date, departure_date, preffered_hotel, preffered_airline, number_of_travelers):
+    valid = re.search(date_pattern, arrival_date)
+    if valid is None:
+        print("Arrival date is invalid! Correct format: year-month-day")
+        info_text.set("Arrival date is invalid! Correct format: year-month-day")
+    valid = re.search(date_pattern, departure_date)
+    if valid is None:
+        print("Departure date is invalid! Correct format: year-month-day")
+        info_text.set("Departure date is invalid! Correct format: year-month-day")
+
+    clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
+    print("Contacting with travel agency...")
+    info_text.set("Contacting with travel agency...")
+    try:
+        clientSocket.connect((TRAVEL_AGENCY_IP, TRAVEL_AGENCY_PORT))
+        req = "/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + preffered_airline + "/" + str(number_of_travelers)
+        response = contact_travel_agency(clientSocket, req)
+        print(response)
+        clientSocket.close()
+    except ConnectionRefusedError:
+        print("Travel agency is not responding. Please try again later.")
+        info_text.set("Travel agency is not responding. Please try again later.")
 
 def reservation():
-    if(tkvarAirway.get()!="Please Select" and tkvarHotel.get()!="Please Select"):
-        print(tkvarAirway.get())
-        print(tkvarHotel.get())
-        print("h.o")
-        helloCallBack()
+    if tkvarAirway.get() != "Please Select" and tkvarHotel.get() != "Please Select":
+        print(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), e3.get().strip())
+        query_reservation(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), int(e3.get().strip()))
     else:
         print("yapma")
-
 
 root = Tk()
 root.title("Network Term Project")
@@ -28,15 +56,19 @@ mainFrame.rowconfigure(0, weight=1)
 mainFrame.pack(pady=100, padx=100)
 
 #TODO : Control input date
-Label(mainFrame, text="Departure ").grid(row=0,column=1)
-Label(mainFrame, text="Return    ").grid(row=1,column=1)
+Label(mainFrame, text="Arrival ").grid(row=0,column=1)
+Label(mainFrame, text="Departure    ").grid(row=1,column=1)
+Label(mainFrame, text="No. of Travelers").grid(row=2,column=1)
 e1 = Entry(mainFrame)
 e2 = Entry(mainFrame)
-e1.insert(10, "2020-12-21")
-e2.insert(10, "2020-12-28")
+e3 = Entry(mainFrame)
+end = date.today() + timedelta(days=1)
+e1.insert(10, date.today().strftime("%Y-%m-%d"))
+e2.insert(10, end.strftime("%Y-%m-%d"))
+e3.insert(0, "2")
 e1.grid(row=0, column=2)
 e2.grid(row=1, column=2)
-
+e3.grid(row=2, column=2)
 
 # Create a Tkinter variable
 tkvarHotel = StringVar(root)
@@ -57,15 +89,14 @@ hotelChoices = {'Thy', 'Pegasus', 'Anadolu Jet', 'Emirates', 'Air France'}
 tkvarAirway.set('Please Select')  # set the default option
 
 popupMenu = OptionMenu(mainFrame, tkvarAirway, *hotelChoices)
-Label(mainFrame, text="Choose a Hotel").grid(row=3, column=3)
+Label(mainFrame, text="Choose an Airline").grid(row=3, column=3)
 popupMenu.grid(row=5, column=3)
 
-button = Button(mainFrame,
-text="Quit",
-fg="red",
-command=quit).grid(row=7, column=3)
-button1 = Button(mainFrame,
- text="Reservate",
- fg="blue",
- command=reservation).grid(row=7, column=1)
+button = Button(mainFrame, text="Quit", fg="red", command=quit)
+button.grid(row=7, column=3)
+button1 = Button(mainFrame, text="Reservate", fg="blue", command=reservation)
+button1.grid(row=7, column=1)
+info_text = StringVar(root)
+info_label = Label(mainFrame, textvariable=info_text)
+info_label.grid(row=8, columnspan=4)
 root.mainloop()
