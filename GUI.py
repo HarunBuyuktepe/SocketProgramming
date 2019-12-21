@@ -64,11 +64,14 @@ def query_get_airlines():#to get hotels' name
 
 
 def reservation():
-    if tkvarAirway.get() != "Please Select" and tkvarHotel.get() != "Please Select":
-        print(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), e3.get().strip())
-        query_reservation(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), int(e3.get().strip()))
+    if tkvarAirway.get() != "Please Select" and tkvarHotel.get() != "Please Select" :
+        if int(e3.get())<1:
+            info_text.set("Please do not enter less than 1 person")
+        else:
+            print(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), e3.get().strip())
+            query_reservation(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), int(e3.get().strip()))
     else:
-        info_text.set("Occur some text mistake")
+        info_text.set("Please select both Airline and Hotel ")
 def clear(string_list):
     string_list = string_list.split("," and "[" and "]" and "'")
     rangeof = len(string_list) - 1
