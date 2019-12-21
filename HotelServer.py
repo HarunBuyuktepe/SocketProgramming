@@ -1,6 +1,9 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
 import json
+from datetime import timedelta, datetime
+
+hotels = {}
 
 class RequestHandler(BaseHTTPRequestHandler):
     def _set_response(self):
@@ -11,36 +14,69 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         print("GET\nPath: {}\nHeaders:\n{}\n".format(str(self.path), str(self.headers)))
         if self.path == "/allHotels":  # Burada bütün otellerin json dosyaları bulunup bir stringde birleştirilip gönderilecek
-            currentDirectory = os.getcwd()
-            files = ""
-            # r=root, d=directories, f = files
-            for r, d, f in os.walk(currentDirectory):
-                for file in f:
-                    if '.json' in file and "h_" in file:
-                        files += str(file) + ";"
-            result = str(files)
+            return str(hotels)
         elif "/hotelQuery/" in self.path:
             tokens = self.path.split("/")
             arrival_date = tokens[2]
             departure_date = tokens[3]
             preffered_hotel = tokens[4].lower()
             number_of_travelers = int(tokens[5].strip())
+            arrival = datetime.strptime(arrival_date, "%Y-%m-%d")
+            departure = datetime.strptime(departure_date, "%Y-%m-%d")
             try:
-                with open("h_" + preffered_hotel + ".json") as hotel_db:
-                    hotel = json.load(hotel_db)
-                    total_room_count = hotel["total_room_count"]
-                    empty_rooms = total_room_count - hotel["reservations"][arrival_date]
-                    if empty_rooms > number_of_travelers:
-                        result = "OK"
-                    else:
-                        result = "Not enough rooms!"
-            except FileNotFoundError:
+                hotel = hotels[preffered_hotel]
+            except KeyError:
                 result = "Invalid hotel name!"
-            except KeyError:  # All rooms are empty
-                if number_of_travelers > total_room_count:
-                    result = "Not enough room!"
-                else:
-                    result = "OK"
+            if arrival == departure:
+                result = "OK"
+            else:
+                total_room_count = hotel["total_room_count"]
+                current = arrival
+                enough_capacity = True
+                while enough_capacity:
+                    try:
+                        empty_rooms = total_room_count - hotel["reservations"][current.strftime("%Y-%m-%d")]
+                        print("empty_rooms", empty_rooms)
+                    except KeyError:
+                        if number_of_travelers > total_room_count:
+                            enough_capacity = False
+                            result = "Not enough rooms!"
+                            break
+                        else:
+                            empty_rooms = total_room_count
+                    if empty_rooms < number_of_travelers:
+                        print("Not enough rooms", number_of_travelers, "-", empty_rooms)
+                        enough_capacity = False
+                        result = "Not enough rooms!"
+                        break
+                    elif (current + timedelta(days=1)) == departure:
+                        result = "OK"
+                        break
+                    current += timedelta(days=1)
+        elif "/hotelReserve" in self.path:
+            tokens = self.path.split("/")
+            arrival_date = tokens[2]
+            departure_date = tokens[3]
+            preffered_hotel = tokens[4].lower()
+            number_of_travelers = int(tokens[5].strip())
+            arrival = datetime.strptime(arrival_date, "%Y-%m-%d")
+            departure = datetime.strptime(departure_date, "%Y-%m-%d")
+            if arrival == departure:
+                result = "OK"
+            else:
+                current = arrival
+                end = False
+                while not end:
+                    try:
+                        hotels[preffered_hotel]["reservations"][current.strftime("%Y-%m-%d")] += number_of_travelers
+                    except KeyError:
+                        hotels[preffered_hotel]["reservations"][current.strftime("%Y-%m-%d")] = number_of_travelers
+                    if (current + timedelta(days=1)) == departure:
+                        end = True
+                    current += timedelta(days=1)
+                with open("h_" + preffered_hotel + ".json", 'w') as outfile:
+                    json.dump(hotels[preffered_hotel], outfile)
+                result = "OK"
         else:
             result = "Invalid request!"
             
@@ -48,17 +84,20 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.flush()
         self.wfile.write(result.encode())
 
-    '''def do_POST(self):
-        content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
-        post_data = self.rfile.read(content_length) # <--- Gets the data itself
-        print("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n", str(self.path), str(self.headers), post_data.decode())
-
-        self._set_response()
-        self.wfile.write("POST request for {}".format(self.path).encode())'''
+def find_all_hotels():
+    currentDirectory = os.getcwd()
+    # r=root, d=directories, f = files
+    for r, d, f in os.walk(currentDirectory):
+        for file in f:
+            if '.json' in file and "h_" in file:
+                hotel_name = file[2:len(file) - 5]
+                with open(file) as hotel_db:
+                    hotels[hotel_name] = json.load(hotel_db)
 
 def run(server_class=HTTPServer, handler_class=RequestHandler, port=33333):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
+    find_all_hotels()
     print("Hotel server has been started.")
     try:
         httpd.serve_forever()

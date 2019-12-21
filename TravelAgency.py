@@ -17,13 +17,12 @@ def contact_with_port(port, request):
     connection = http.client.HTTPConnection("127.0.0.1", port)
     connection.request("GET", request)
     response = connection.getresponse()
-    asd = response.read().decode()
-    print(asd)
+    message = response.read().decode()
+    print(message)
     connection.close()
-    return asd
+    return message
 
 try:
-    print("asdasda")
     while True:
         connectionSocket, addr = serverSocket.accept()
         print("Got connection from", addr)
@@ -41,8 +40,6 @@ try:
             preffered_airline = tokens[4]
             number_of_travelers = tokens[5]
 
-            print("tokens", tokens)
-
             today = date.today()
             arrival = datetime.strptime(arrival_date, "%Y-%m-%d")
             departure = datetime.strptime(departure_date, "%Y-%m-%d")
@@ -55,6 +52,10 @@ try:
                     airline_query = "/airlineQuery/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
                     result = contact_with_port(AIRLINE_PORT, airline_query)
                     if result == "OK":
+                        hotel_reserve = "/hotelReserve/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
+                        contact_with_port(HOTEL_PORT, hotel_reserve)
+                        airline_reserve = "/airlineReserve/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
+                        contact_with_port(AIRLINE_PORT, airline_reserve)
                         result = "Reservation completed succesfully."
 
         connectionSocket.send(result.encode())
