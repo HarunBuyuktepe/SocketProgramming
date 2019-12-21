@@ -26,17 +26,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                     passenger_capacity = airline["passenger_capacity"]
                     empty_seats1 = passenger_capacity - airline["reservations"][arrival_date]
                 except KeyError:  # All seats are empty
+                    empty_seats1 = passenger_capacity
+                finally:
                     try:
                         empty_seats2 = passenger_capacity - airline["reservations"][departure_date]
+                    except KeyError:
+                        empty_seats2 = passenger_capacity
+                    finally:
                         if empty_seats1 >= number_of_travelers and empty_seats2 >= number_of_travelers:
                             result = "OK"
-                        else:
-                            result = "Not enough seats!"
-                    except KeyError:
-                        if number_of_travelers <= passenger_capacity:
-                            result = "OK"
-                        else:
-                            result = "Not enough seats!"
+                        else:  # Not enough empty seats
+                            result = find_all_airlines_by_dates(arrival_date, departure_date, number_of_travelers)
             except KeyError:
                 result = "Invalid airline name!"
         elif "/airlineReserve" in self.path:
@@ -62,6 +62,28 @@ class RequestHandler(BaseHTTPRequestHandler):
         self._set_response()
         self.wfile.flush()
         self.wfile.write(result.encode())
+
+def find_all_airlines_by_dates(arrival_date, departure_date, number_of_travelers):
+    result = "alternatives="
+    for key in airlines:
+        airline = airlines[key]
+        passenger_capacity = airline["passenger_capacity"]
+        try:
+            empty_seats1 = passenger_capacity - airline["reservations"][arrival_date]
+        except KeyError:  # All seats are empty
+            empty_seats1 = passenger_capacity
+        finally:
+            try:
+                empty_seats2 = passenger_capacity - airline["reservations"][departure_date]
+            except KeyError:
+                empty_seats2 = passenger_capacity
+            finally:
+                if empty_seats1 >= number_of_travelers and empty_seats2 >= number_of_travelers:
+                    result += key + ";"
+    if len(result) > 13:  # len(alternatives=) = 13 (There are some suitable airlines)
+        return result[0:len(result) - 1]  # airline1;airline2;airline3 (Remove last ;)
+    else:
+        return "NO"
 
 def find_all_airlines():
     currentDirectory = os.getcwd()

@@ -47,16 +47,23 @@ try:
                 result = "You cannot choose a past date!"
             else:
                 hotel_query = "/hotelQuery/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
-                result = contact_with_port(HOTEL_PORT, hotel_query)
-                if result == "OK":
-                    airline_query = "/airlineQuery/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
-                    result = contact_with_port(AIRLINE_PORT, airline_query)
-                    if result == "OK":
-                        hotel_reserve = "/hotelReserve/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
-                        contact_with_port(HOTEL_PORT, hotel_reserve)
-                        airline_reserve = "/airlineReserve/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
-                        contact_with_port(AIRLINE_PORT, airline_reserve)
-                        result = "Reservation completed succesfully."
+                hotel_result = contact_with_port(HOTEL_PORT, hotel_query)
+                airline_query = "/airlineQuery/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
+                airline_result = contact_with_port(AIRLINE_PORT, airline_query)
+                if hotel_result == "OK" and airline_result == "OK":
+                    hotel_reserve = "/hotelReserve/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
+                    contact_with_port(HOTEL_PORT, hotel_reserve)
+                    airline_reserve = "/airlineReserve/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
+                    contact_with_port(AIRLINE_PORT, airline_reserve)
+                    result = "Reservation completed succesfully."
+                elif hotel_result == "NO" and airline_result == "NO":
+                    result = "Unfortunately no hotels and airlines are available for the dates and number of travelers!"
+                elif hotel_result == "NO":
+                    result = "Unfortunately there is no available hotel for your choices!"
+                elif airline_result == "NO":
+                    result = "Unfortunately there is no available airline for your choices!"
+                else:
+                    result = hotel_result + "\n" + airline_result
 
         connectionSocket.send(result.encode())
         connectionSocket.close()

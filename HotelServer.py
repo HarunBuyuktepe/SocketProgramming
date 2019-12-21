@@ -34,23 +34,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                     while enough_capacity:
                         try:
                             empty_rooms = total_room_count - hotel["reservations"][current.strftime("%Y-%m-%d")]
-                            print("empty_rooms", empty_rooms)
+                            print("total_rooms:", total_room_count, "empty_rooms:", empty_rooms)
                         except KeyError:
-                            if number_of_travelers > total_room_count:
+                            empty_rooms = total_room_count
+                        finally:
+                            if number_of_travelers > empty_rooms:
                                 enough_capacity = False
-                                result = "Not enough rooms!"
+                                result = find_all_hotels_by_dates(arrival, departure, number_of_travelers)
                                 break
-                            else:
-                                empty_rooms = total_room_count
-                        if empty_rooms < number_of_travelers:
-                            print("Not enough rooms", number_of_travelers, "-", empty_rooms)
-                            enough_capacity = False
-                            result = "Not enough rooms!"
-                            break
-                        elif (current + timedelta(days=1)) == departure:
-                            result = "OK"
-                            break
-                        current += timedelta(days=1)
+                            elif (current + timedelta(days=1)) == departure:
+                                result = "OK"
+                                break
+                            current += timedelta(days=1)
             except KeyError:
                 result = "Invalid hotel name!"
         elif "/hotelReserve" in self.path:
@@ -83,6 +78,35 @@ class RequestHandler(BaseHTTPRequestHandler):
         self._set_response()
         self.wfile.flush()
         self.wfile.write(result.encode())
+
+def find_all_hotels_by_dates(arrival, departure, number_of_travelers):
+    result = "alternatives="
+    for key in hotels:
+        hotel = hotels[key]
+        if arrival == departure:
+            result += key + ";"
+        else:
+            total_room_count = hotel["total_room_count"]
+            current = arrival
+            end = False
+            while not end:
+                try:
+                    empty_rooms = total_room_count - hotel["reservations"][current.strftime("%Y-%m-%d")]
+                    print("total_rooms:", total_room_count, "empty_rooms:", empty_rooms)
+                except KeyError:
+                    empty_rooms = total_room_count
+                finally:
+                    if number_of_travelers <= empty_rooms:
+                        result += key + ";"
+                    if (current + timedelta(days=1)) != departure:
+                        print("current:", current.strftime("%Y-%m-%d"))
+                        current += timedelta(days=1)
+                    else:
+                        end = True
+    if len(result) > 13:  # len(alternatives=) = 13 (There are some suitable hotels)
+        return result[0:len(result) - 1]  # hotel1;hotel2;hotel3 (Remove last ;)
+    else:
+        return "NO"
 
 def find_all_hotels():
     currentDirectory = os.getcwd()
