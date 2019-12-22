@@ -1,5 +1,6 @@
 from tkinter import *
-import tkinter as ttk
+from tkinter import messagebox
+import tkinter as tk
 import os
 from datetime import date, datetime, timedelta
 import socket
@@ -14,16 +15,7 @@ def contact_travel_agency(socket, request):
     socket.send(request.encode())
     return socket.recv(1024).decode()
 
-def query_reservation(arrival_date, departure_date, preffered_hotel, preffered_airline, number_of_travelers):
-    valid = re.search(date_pattern, arrival_date)
-    if valid is None:
-        print("Arrival date is invalid! Correct format: year-month-day")
-        info_text.set("Arrival date is invalid! Correct format: year-month-day")
-    valid = re.search(date_pattern, departure_date)
-    if valid is None:
-        print("Departure date is invalid! Correct format: year-month-day")
-        info_text.set("Departure date is invalid! Correct format: year-month-day")
-
+def reserve(arrival_date, departure_date, preffered_hotel, preffered_airline, number_of_travelers):  # Sending reservation request
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
     print("Contacting with travel agency...")
     info_text.set("Contacting with travel agency...")
@@ -32,13 +24,35 @@ def query_reservation(arrival_date, departure_date, preffered_hotel, preffered_a
         req = "/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + preffered_airline + "/" + str(number_of_travelers)
         response = contact_travel_agency(clientSocket, req)
         print(response)
-        info_text.set(response)
         clientSocket.close()
+        if "alternatives" in response:
+            statuses = response.split("|")
+            hotel_status = statuses[0]
+            airline_status = statuses[1]
+            if hotel_status != "OK":
+                alternative_hotels = hotel_status[13:len(hotel_status)].split(";")
+            else:
+                alternative_hotels = [preffered_hotel]
+            if airline_status != "OK":
+                alternative_airlines = airline_status[13:len(airline_status)].split(";")
+            else:
+                alternative_airlines = [preffered_airline]
+            for i in range(0, len(alternative_hotels)):
+                for j in range(0, len(alternative_airlines)):
+                    choice = messagebox.askyesno("Alternative Plan", "Would you like to choose Hotel: " + alternative_hotels[i] + " and Airline: " + alternative_airlines[j] + "?")
+                    if choice is True:
+                        reserve(arrival_date, departure_date, alternative_hotels[i], alternative_airlines[j], number_of_travelers)
+                        tkvarHotel.set(alternative_hotels[i])
+                        tkvarAirway.set(alternative_airlines[j])
+                        return
+            info_text.set("None of alternative plans has been selected!")
+        else:
+            info_text.set(response)
     except ConnectionRefusedError:
         print("Travel agency is not responding. Please try again later.")
         info_text.set("Travel agency is not responding. Please try again later.")
 
-def query_get_hotels():#to get hotels' name
+def query_get_hotels():  # To get hotels' names
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
     print("Contacting with travel agency...")
     try:
@@ -49,8 +63,9 @@ def query_get_hotels():#to get hotels' name
         return clear(response)
     except ConnectionRefusedError:
         print("Travel agency is not responding. Please try again later.")
+        exit()
 
-def query_get_airlines():#to get hotels' name
+def query_get_airlines():  # To get airlines' names
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # Create a TCP socket
     print("Contacting with travel agency...")
     try:
@@ -61,17 +76,37 @@ def query_get_airlines():#to get hotels' name
         return clear(response)
     except ConnectionRefusedError:
         print("Travel agency is not responding. Please try again later.")
+        exit()
 
-
-def reservation():
-    if tkvarAirway.get() != "Please Select" and tkvarHotel.get() != "Please Select" :
-        if int(e3.get())<1:
-            info_text.set("Please do not enter less than 1 person")
-        else:
-            print(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), e3.get().strip())
-            query_reservation(e1.get().strip(), e2.get().strip(), tkvarHotel.get(), tkvarAirway.get(), int(e3.get().strip()))
+def query_reservation():  # Checking reservation inputs. If all valid, call reservation function
+    try:
+        number_of_travelers = int(e3.get())
+    except ValueError:
+        info_text.set("Please give a positive integer for number of travelers!")
+        return
+    arrival_date = e1.get().strip()
+    departure_date = e2.get().strip()
+    arrival = datetime.strptime(arrival_date, "%Y-%m-%d")
+    departure = datetime.strptime(departure_date, "%Y-%m-%d")
+    if arrival.date() < date.today() or departure.date() < date.today():
+        info_text.set("You cannot choose a past date!")
+    elif arrival.date() > departure.date():
+        info_text.set("Departure must be later than arrival!")
+    elif tkvarAirway.get() != "Please Select" and tkvarHotel.get() != "Please Select":
+        if number_of_travelers < 1:
+            info_text.set("Number of travelers cannot be less than 1!")
+        elif re.search(date_pattern, arrival_date) is None:
+            print("Arrival date is invalid! Correct format: year-month-day")
+            info_text.set("Arrival date is invalid! Correct format: year-month-day")
+        elif re.search(date_pattern, departure_date) is None:
+            print("Departure date is invalid! Correct format: year-month-day")
+            info_text.set("Departure date is invalid! Correct format: year-month-day")
+        else:  # Correct input
+            print(arrival_date, departure_date, tkvarHotel.get(), tkvarAirway.get(), number_of_travelers)
+            reserve(arrival_date, departure_date, tkvarHotel.get(), tkvarAirway.get(), number_of_travelers)
     else:
-        info_text.set("Please select both Airline and Hotel ")
+        info_text.set("Please select both airline and hotel!")
+
 def clear(string_list):
     string_list = string_list.split("," and "[" and "]" and "'")
     rangeof = len(string_list) - 1
@@ -124,16 +159,16 @@ popupMenu.grid(row=5, column=1)
 tkvarAirway = StringVar(root)
 
 # Dictionary with options
-airlinesChoices = query_get_airlines()
+hotelChoices = query_get_airlines()
 tkvarAirway.set('Please Select')  # set the default option
 
-popupMenu = OptionMenu(mainFrame, tkvarAirway, *airlinesChoices)
+popupMenu = OptionMenu(mainFrame, tkvarAirway, *hotelChoices)
 Label(mainFrame, text="Choose an Airline").grid(row=3, column=3)
 popupMenu.grid(row=5, column=3)
 
 button = Button(mainFrame, text="Quit", fg="red", command=quit)
 button.grid(row=7, column=3)
-button1 = Button(mainFrame, text="Reservate", fg="blue", command=reservation)
+button1 = Button(mainFrame, text="Reserve", fg="blue", command=query_reservation)
 button1.grid(row=7, column=1)
 info_text = StringVar(root)
 info_label = Label(mainFrame, textvariable=info_text)

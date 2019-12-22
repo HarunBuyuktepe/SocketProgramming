@@ -5,6 +5,7 @@ from datetime import timedelta, datetime
 
 hotels = {}
 hotels_for_gui = []
+
 class RequestHandler(BaseHTTPRequestHandler):
     def _set_response(self):
         self.send_response(200)
@@ -14,7 +15,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         print("GET\nPath: {}\nHeaders:\n{}\n".format(str(self.path), str(self.headers)))
         if self.path == "/allHotels":
-            result =  str(hotels_for_gui)
+            result = str(hotels_for_gui)
         elif "/hotelQuery/" in self.path:
             tokens = self.path.split("/")
             arrival_date = tokens[2]
@@ -118,8 +119,6 @@ def find_all_hotels():
                 with open(file) as hotel_db:
                     hotels[hotel_name] = json.load(hotel_db)
                     hotels_for_gui.append(hotel_name)
-
-
 
 def run(server_class=HTTPServer, handler_class=RequestHandler, port=33333):
     server_address = ('', port)

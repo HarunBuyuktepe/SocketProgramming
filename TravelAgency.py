@@ -39,31 +39,24 @@ try:
             preffered_hotel = tokens[3]
             preffered_airline = tokens[4]
             number_of_travelers = tokens[5]
-
-            today = date.today()
-            arrival = datetime.strptime(arrival_date, "%Y-%m-%d")
-            departure = datetime.strptime(departure_date, "%Y-%m-%d")
-            if arrival.date() < today or departure.date() < today:
-                result = "You cannot choose a past date!"
+            hotel_query = "/hotelQuery/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
+            hotel_result = contact_with_port(HOTEL_PORT, hotel_query)
+            airline_query = "/airlineQuery/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
+            airline_result = contact_with_port(AIRLINE_PORT, airline_query)
+            if hotel_result == "OK" and airline_result == "OK":
+                hotel_reserve = "/hotelReserve/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
+                contact_with_port(HOTEL_PORT, hotel_reserve)
+                airline_reserve = "/airlineReserve/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
+                contact_with_port(AIRLINE_PORT, airline_reserve)
+                result = "Reservation completed succesfully."
+            elif hotel_result == "NO" and airline_result == "NO":
+                result = "Unfortunately no hotels and airlines are available for the dates and number of travelers!"
+            elif hotel_result == "NO":
+                result = "Unfortunately there is no available hotel for your choices!"
+            elif airline_result == "NO":
+                result = "Unfortunately there is no available airline for your choices!"
             else:
-                hotel_query = "/hotelQuery/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
-                hotel_result = contact_with_port(HOTEL_PORT, hotel_query)
-                airline_query = "/airlineQuery/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
-                airline_result = contact_with_port(AIRLINE_PORT, airline_query)
-                if hotel_result == "OK" and airline_result == "OK":
-                    hotel_reserve = "/hotelReserve/" + arrival_date + "/" + departure_date + "/" + preffered_hotel + "/" + number_of_travelers
-                    contact_with_port(HOTEL_PORT, hotel_reserve)
-                    airline_reserve = "/airlineReserve/" + arrival_date + "/" + departure_date + "/" + preffered_airline + "/" + number_of_travelers
-                    contact_with_port(AIRLINE_PORT, airline_reserve)
-                    result = "Reservation completed succesfully."
-                elif hotel_result == "NO" and airline_result == "NO":
-                    result = "Unfortunately no hotels and airlines are available for the dates and number of travelers!"
-                elif hotel_result == "NO":
-                    result = "Unfortunately there is no available hotel for your choices!"
-                elif airline_result == "NO":
-                    result = "Unfortunately there is no available airline for your choices!"
-                else:
-                    result = hotel_result + "\n" + airline_result
+                result = hotel_result + "|" + airline_result
 
         connectionSocket.send(result.encode())
         connectionSocket.close()

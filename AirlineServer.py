@@ -14,7 +14,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         print("GET\nPath: {}\nHeaders:\n{}\n".format(str(self.path), str(self.headers)))
         if self.path == "/allAirlines":  # Burada bütün otellerin json dosyaları bulunup bir stringde birleştirilip gönderilecek
-            result= str(airlines_for_gui)
+            result = str(airlines_for_gui)
         elif "/airlineQuery/" in self.path:
             tokens = self.path.split("/")
             arrival_date = tokens[2]
@@ -79,6 +79,7 @@ def find_all_airlines_by_dates(arrival_date, departure_date, number_of_travelers
             except KeyError:
                 empty_seats2 = passenger_capacity
             finally:
+                print(number_of_travelers, key, "emptyseats1", empty_seats1, "emptyseats2", empty_seats2)
                 if empty_seats1 >= number_of_travelers and empty_seats2 >= number_of_travelers:
                     result += key + ";"
     if len(result) > 13:  # len(alternatives=) = 13 (There are some suitable airlines)
